@@ -12,7 +12,7 @@
 
         public MarketData(IEnumerable<CompanyData> companies)
         {
-            _data = companies.SelectMany(c => c.dates).Order().ToList();
+            _data = companies.SelectMany(c => c.Dates).Order().ToList();
         }
 
         public DateTime FirstEntryDate => _data.First();
@@ -20,5 +20,5 @@
         public DateTime LastEntryDate => _data.Last();
     }
 
-    internal record CompanyData(IEnumerable<DateTime> dates);
+    internal record CompanyData(IEnumerable<DateTime> Dates);
 }
