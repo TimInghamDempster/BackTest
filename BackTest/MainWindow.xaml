@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BackTest"
         mc:Ignorable="d"
+        xmlns:oxy="http://oxyplot.org/wpf"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-
+        <oxy:PlotView Model="{Binding MainPlot}"/>
     </Grid>
 </Window>

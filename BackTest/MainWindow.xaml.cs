@@ -9,9 +9,10 @@ namespace BackTest
     {
         public MainWindow()
         {
+            var marketData = new MarketData();
 
             WindowState = WindowState.Maximized;
-            DataContext = new MainWindowVM();
+            DataContext = new MainWindowVM(marketData);
             InitializeComponent();
         }
     }
