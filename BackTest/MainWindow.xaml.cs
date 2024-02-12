@@ -9,7 +9,9 @@ namespace BackTest
     {
         public MainWindow()
         {
-            var marketData = new MarketData();
+            // Use this as composition root since this is a siple
+            // application which won't need a DI container
+            var marketData = new MarketData(new List<CompanyData>());
 
             WindowState = WindowState.Maximized;
             DataContext = new MainWindowVM(marketData);

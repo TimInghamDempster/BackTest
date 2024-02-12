@@ -8,8 +8,17 @@
 
     internal class MarketData : IMarketData
     {
-        public DateTime FirstEntryDate => throw new NotImplementedException();
+        private IReadOnlyList<DateTime> _data;
 
-        public DateTime LastEntryDate => throw new NotImplementedException();
+        public MarketData(IEnumerable<CompanyData> companies)
+        {
+            _data = companies.SelectMany(c => c.dates).Order().ToList();
+        }
+
+        public DateTime FirstEntryDate => _data.First();
+
+        public DateTime LastEntryDate => _data.Last();
     }
+
+    internal record CompanyData(IEnumerable<DateTime> dates);
 }
