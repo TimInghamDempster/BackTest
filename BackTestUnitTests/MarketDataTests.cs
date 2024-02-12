@@ -1,5 +1,6 @@
 using BackTest;
 using FluentAssertions;
+using NSubstitute;
 
 namespace BackTestUnitTests
 {
@@ -22,8 +23,11 @@ namespace BackTestUnitTests
             var companyB = new CompanyData(new List<DateTime>() { midDate, endDate });
             var companies = new List<CompanyData>() { companyA, companyB };
 
+            var dataSource = Substitute.For<IDataSource>();
+            dataSource.GetCompanies().Returns(companies);
+
             // Act
-            var marketData = new MarketData(companies);
+            var marketData = new MarketData(dataSource);
 
             // Assert
             marketData.FirstEntryDate.Should().Be(startDate);

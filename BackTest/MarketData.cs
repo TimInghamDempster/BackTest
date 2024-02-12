@@ -10,9 +10,9 @@
     {
         private IReadOnlyList<DateTime> _data;
 
-        public MarketData(IEnumerable<CompanyData> companies)
+        public MarketData(IDataSource dataSource)
         {
-            _data = companies.SelectMany(c => c.Dates).Order().ToList();
+            _data = dataSource.GetCompanies().SelectMany(c => c.Dates).Order().ToList();
         }
 
         public DateTime FirstEntryDate => _data.First();

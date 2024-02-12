@@ -22,6 +22,7 @@ namespace BackTestUnitTests
             // Act
             var companyData = CsvParser.Parse(new[]
             {
+                "Header",
                 "1990-1-12,0,0,0,0,0,0,0",
                 "2000-2-3,0,0,0,0,0,0,0",
                 "2010-4-6,0,0,0,0,0,0,0"
