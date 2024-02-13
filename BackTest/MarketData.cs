@@ -12,7 +12,12 @@
 
         public MarketData(IDataSource dataSource)
         {
-            _data = dataSource.GetCompanies().SelectMany(c => c.Dates).Order().ToList();
+            _data = dataSource.
+                GetCompanies().
+                SelectMany(c => c.Dates).
+                Select(d => d.Date).
+                Order().
+                ToList();
         }
 
         public DateTime FirstEntryDate => _data.First();
@@ -20,5 +25,7 @@
         public DateTime LastEntryDate => _data.Last();
     }
 
-    internal record CompanyData(IEnumerable<DateTime> Dates);
+    internal record PriceAtTime(DateTime Date, double Price);
+
+    internal record CompanyData(IEnumerable<PriceAtTime> Dates);
 }

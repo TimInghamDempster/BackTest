@@ -19,8 +19,8 @@ namespace BackTestUnitTests
             var midDate = new DateTime(2000, 2, 3);
             var endDate = new DateTime(2010, 4, 6);
 
-            var companyA = new CompanyData(new List<DateTime>() { startDate, midDate });
-            var companyB = new CompanyData(new List<DateTime>() { midDate, endDate });
+            var companyA = new CompanyData(new List<PriceAtTime>() { new(startDate, 0.5), new(midDate, 0.75) });
+            var companyB = new CompanyData(new List<PriceAtTime>() { new(midDate, 1.9), new(endDate, 5.7) });
             var companies = new List<CompanyData>() { companyA, companyB };
 
             var dataSource = Substitute.For<IDataSource>();
