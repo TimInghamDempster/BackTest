@@ -8,20 +8,21 @@
         internal static CompanyData Parse(CompanyName name, IEnumerable<Row> csvData) =>
             new(name, csvData.GetData());
 
-        private static IEnumerable<PriceAtTime> GetData(this IEnumerable<Row> csvData) =>
+        private static IReadOnlyDictionary<DateTime, PriceAtTime> GetData(this IEnumerable<Row> csvData) =>
             csvData.RemoveHeader().
             GetFirstColumns().
             ParseData().
-            RemoveNulls();
+            RemoveNulls().
+            ToDictionary();
 
         // TODO: Move to common library at some point
-        private static IEnumerable<T> RemoveNulls<T>(this IEnumerable<T?> source) where T : class =>
-            source.Where(r => r is not null).Select(r => r!);
+        private static IEnumerable<T> RemoveNulls<T>(this IEnumerable<T?> source) where T : struct =>
+            source.Where(r => r.HasValue).Select(r => r!.Value);
 
         private static IEnumerable<Cells> GetFirstColumns(this IEnumerable<Row> csvData) =>
             csvData.Select(s => new Cells(s.Data.Split(',').First(), s.Data.Split(',').ElementAt(2)));
 
-        private static IEnumerable<PriceAtTime?> ParseData(this IEnumerable<Cells> source) =>
+        private static IEnumerable<(DateTime Date, PriceAtTime Price)?> ParseData(this IEnumerable<Cells> source) =>
             source.Select(c =>
             {
                 var dateSuccess = DateTime.TryParse(c.DataCol0, out var res);
@@ -29,8 +30,13 @@
                 
                 var priceSuccess = double.TryParse(c.DataCol2, out var price);
                 double? priceDouble = priceSuccess ? price : null;
+                
+                (DateTime, PriceAtTime)? priceAtTime = 
+                priceSuccess && dateSuccess ? 
+                new(dateTime!.Value, new PriceAtTime(price)) : 
+                null;
 
-                return priceSuccess && dateSuccess ? new PriceAtTime(dateTime!.Value, price) : null;
+                return priceAtTime;
             });
 
         private static IEnumerable<Row> RemoveHeader(this IEnumerable<Row> csvData) =>

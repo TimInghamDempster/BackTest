@@ -5,7 +5,7 @@ namespace BackTest
 {
     internal interface IDataSource
     {
-        internal IEnumerable<CompanyData> GetCompanies();
+        internal IReadOnlyDictionary<CompanyName, CompanyData> GetCompanies();
     }
 
     // Holds code that can't be unit tested because it talks
@@ -14,7 +14,7 @@ namespace BackTest
     {
         private record struct Company(string Path);
 
-        private IEnumerable<CompanyData> _companies;
+        private IReadOnlyDictionary<CompanyName, CompanyData> _companies;
 
         // TODO: handle errors like file not found.  Basic premise will
         // be to move this from a constructor to a factory method and
@@ -23,7 +23,8 @@ namespace BackTest
         {
             var name = Path.GetFileNameWithoutExtension(path);
             _companies = GetCompanies(path).Select(
-                f => Parse(new(name), ReadAllLines(f)));
+                f => Parse(new(name), ReadAllLines(f))).
+                ToDictionary(c => c.Name, c => c);
         }
 
         IEnumerable<Row> ReadAllLines(Company company) =>
@@ -34,7 +35,7 @@ namespace BackTest
                 path, "*.csv", SearchOption.AllDirectories).
             Select(f => new Company(f));
 
-        IEnumerable<CompanyData> IDataSource.GetCompanies() =>
+        IReadOnlyDictionary<CompanyName, CompanyData> IDataSource.GetCompanies() =>
             _companies;
     }
 }

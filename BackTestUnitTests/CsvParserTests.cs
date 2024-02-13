@@ -1,3 +1,4 @@
+using BackTest;
 using FluentAssertions;
 using static BackTest.CsvParser;
 
@@ -29,9 +30,9 @@ namespace BackTestUnitTests
             });
 
             // Assert
-            companyData.Data.First().Date.Should().Be(startDate);
-            companyData.Data.Last().Date.Should().Be(endDate);
-            companyData.Data.ElementAt(1).Date.Should().Be(midDate);
+            companyData.Data.First().Key.Should().Be(startDate);
+            companyData.Data.Last().Key.Should().Be(endDate);
+            companyData.Data.ElementAt(1).Key.Should().Be(midDate);
         }
 
         [Test]
@@ -53,9 +54,9 @@ namespace BackTestUnitTests
             });
 
             // Assert
-            companyData.Data.First().Price.Should().Be(3);
-            companyData.Data.Last().Price.Should().Be(2.5);
-            companyData.Data.ElementAt(1).Price.Should().Be(40);
+            companyData.Data.First().Value.Should().Be(new PriceAtTime(3));
+            companyData.Data.Last().Value.Should().Be(new PriceAtTime(2.5));
+            companyData.Data.ElementAt(1).Value.Should().Be(new PriceAtTime(40));
         }
     }
 }

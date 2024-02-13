@@ -9,31 +9,39 @@
 
     internal class MarketData : IMarketData
     {
-        private IReadOnlyList<DateTime> _data;
+        private IReadOnlyDictionary<CompanyName, CompanyData> _data;
 
         public MarketData(IDataSource dataSource)
         {
             var companies = dataSource.GetCompanies();
 
-            Companies = companies.Select(c => c.Name).ToList();
+            Companies = companies.Keys.ToList();
 
-            _data = companies.
-                SelectMany(c => c.Data).
-                Select(d => d.Date).
+            _data = dataSource.GetCompanies();
+
+            var dates = companies.
+                SelectMany(c => c.Value.Data).
+                Select(d => d.Key).
                 Order().
                 ToList();
+
+            FirstEntryDate = dates.First();
+            LastEntryDate = dates.Last();
         }
 
-        public DateTime FirstEntryDate => _data.First();
+        public DateTime FirstEntryDate { get; private init; }
 
-        public DateTime LastEntryDate => _data.Last();
+        public DateTime LastEntryDate { get; private init; }
 
         public IEnumerable<CompanyName> Companies { get; private init; }
+
+        internal PriceAtTime GetPriceAtTime(CompanyName name, DateTime startDate) =>
+            _data[name].Data[startDate];
     }
 
-    internal record CompanyName(string Name);
+    internal record struct CompanyName(string Name);
 
-    internal record PriceAtTime(DateTime Date, double Price);
+    internal record struct PriceAtTime(double Price);
 
-    internal record CompanyData(CompanyName Name, IEnumerable<PriceAtTime> Data);
+    internal record CompanyData(CompanyName Name, IReadOnlyDictionary<DateTime, PriceAtTime> Data);
 }
