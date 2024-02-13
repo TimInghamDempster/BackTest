@@ -21,9 +21,9 @@ namespace BackTest
         // return a result monad
         internal FileSpecificDataSource(string path)
         {
-            var name = Path.GetFileNameWithoutExtension(path);
             _companies = GetCompanies(path).Select(
-                f => Parse(new(name), ReadAllLines(f))).
+                f => Parse(new(Path.GetFileNameWithoutExtension(f.Path)), ReadAllLines(f))).
+                DistinctBy(c => c.Name).
                 ToDictionary(c => c.Name, c => c);
         }
 

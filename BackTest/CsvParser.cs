@@ -13,6 +13,7 @@
             GetFirstColumns().
             ParseData().
             RemoveNulls().
+            DistinctBy(d => d.Date).
             ToDictionary();
 
         // TODO: Move to common library at some point
