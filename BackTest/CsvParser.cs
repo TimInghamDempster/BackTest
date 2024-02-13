@@ -2,10 +2,13 @@
 {
     internal static class CsvParser
     {
-        internal static CompanyData Parse(IEnumerable<string> csvData) =>
+        internal record struct Row(string Data);
+        internal record struct Cell(string Data);
+
+        internal static CompanyData Parse(IEnumerable<Row> csvData) =>
             new(csvData.GetDates());
 
-        private static IEnumerable<DateTime> GetDates(this IEnumerable<string> csvData) =>
+        private static IEnumerable<DateTime> GetDates(this IEnumerable<Row> csvData) =>
             csvData.RemoveHeader().
             GetFirstColumns().
             ParseDates().
@@ -15,18 +18,18 @@
         private static IEnumerable<T> RemoveNulls<T>(this IEnumerable<T?> source) where T : struct =>
             source.Where(r => r.HasValue).Select(r => r!.Value);
 
-        private static IEnumerable<string> GetFirstColumns(this IEnumerable<string> csvData) =>
-            csvData.Select(s => s.Split(',').First());
+        private static IEnumerable<Cell> GetFirstColumns(this IEnumerable<Row> csvData) =>
+            csvData.Select(s => new Cell(s.Data.Split(',').First()));
 
-        private static IEnumerable<DateTime?> ParseDates(this IEnumerable<string> source) =>
-            source.Select(d =>
+        private static IEnumerable<DateTime?> ParseDates(this IEnumerable<Cell> source) =>
+            source.Select(c =>
             {
-                var success = DateTime.TryParse(d, out var res);
+                var success = DateTime.TryParse(c.Data, out var res);
                 DateTime? dateTime = success ? res : null;
                 return dateTime;
             });
 
-        private static IEnumerable<string> RemoveHeader(this IEnumerable<string> csvData) =>
+        private static IEnumerable<Row> RemoveHeader(this IEnumerable<Row> csvData) =>
              csvData.Skip(1);
     }
 }

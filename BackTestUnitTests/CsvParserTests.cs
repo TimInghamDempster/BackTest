@@ -1,5 +1,5 @@
-using BackTest;
 using FluentAssertions;
+using static BackTest.CsvParser;
 
 namespace BackTestUnitTests
 {
@@ -20,12 +20,12 @@ namespace BackTestUnitTests
 
 
             // Act
-            var companyData = CsvParser.Parse(new[]
+            var companyData = Parse(new[]
             {
-                "Header",
-                "1990-1-12,0,0,0,0,0,0,0",
-                "2000-2-3,0,0,0,0,0,0,0",
-                "2010-4-6,0,0,0,0,0,0,0"
+                new Row("Header"),
+                new Row("1990-1-12,0,0,0,0,0,0,0"),
+                new Row("2000-2-3,0,0,0,0,0,0,0"),
+                new Row("2010-4-6,0,0,0,0,0,0,0")
             });
 
             // Assert

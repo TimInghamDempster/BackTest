@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using static BackTest.CsvParser;
 
 namespace BackTest
 {
@@ -11,6 +12,8 @@ namespace BackTest
     // to the file system
     internal class FileSpecificDataSource : IDataSource
     {
+        private record struct Company(string Path);
+
         private IEnumerable<CompanyData> _companies;
 
         // TODO: handle errors like file not found.  Basic premise will
@@ -22,12 +25,13 @@ namespace BackTest
                 f => CsvParser.Parse(ReadAllLines(f)));
         }
 
-        IEnumerable<string> ReadAllLines(string path) =>
-            File.ReadAllLines(path);
+        IEnumerable<Row> ReadAllLines(Company company) =>
+            File.ReadAllLines(company.Path).Select(l => new Row(l));
 
-        IEnumerable<string> GetCompanies(string path) =>
+        IEnumerable<Company> GetCompanies(string path) =>
             Directory.EnumerateFiles(
-                path, "*.csv", SearchOption.AllDirectories);
+                path, "*.csv", SearchOption.AllDirectories).
+            Select(f => new Company(f));
 
         IEnumerable<CompanyData> IDataSource.GetCompanies() =>
             _companies;
