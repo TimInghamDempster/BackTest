@@ -21,8 +21,9 @@ namespace BackTest
         // return a result monad
         internal FileSpecificDataSource(string path)
         {
+            var name = Path.GetFileNameWithoutExtension(path);
             _companies = GetCompanies(path).Select(
-                f => CsvParser.Parse(ReadAllLines(f)));
+                f => Parse(new(name), ReadAllLines(f)));
         }
 
         IEnumerable<Row> ReadAllLines(Company company) =>

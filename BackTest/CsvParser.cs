@@ -5,8 +5,8 @@
         internal record struct Row(string Data);
         internal record struct Cells(string DataCol0, string DataCol2);
 
-        internal static CompanyData Parse(IEnumerable<Row> csvData) =>
-            new(csvData.GetData());
+        internal static CompanyData Parse(CompanyName name, IEnumerable<Row> csvData) =>
+            new(name, csvData.GetData());
 
         private static IEnumerable<PriceAtTime> GetData(this IEnumerable<Row> csvData) =>
             csvData.RemoveHeader().

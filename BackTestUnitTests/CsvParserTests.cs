@@ -20,7 +20,7 @@ namespace BackTestUnitTests
 
 
             // Act
-            var companyData = Parse(new[]
+            var companyData = Parse(new(""), new[]
             {
                 new Row("Header"),
                 new Row("1990-1-12,0,0,0,0,0,0,0"),
@@ -29,9 +29,9 @@ namespace BackTestUnitTests
             });
 
             // Assert
-            companyData.Dates.First().Date.Should().Be(startDate);
-            companyData.Dates.Last().Date.Should().Be(endDate);
-            companyData.Dates.ElementAt(1).Date.Should().Be(midDate);
+            companyData.Data.First().Date.Should().Be(startDate);
+            companyData.Data.Last().Date.Should().Be(endDate);
+            companyData.Data.ElementAt(1).Date.Should().Be(midDate);
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace BackTestUnitTests
 
 
             // Act
-            var companyData = Parse(new[]
+            var companyData = Parse(new(""), new[]
             {
                 new Row("Header"),
                 new Row("1990-1-12,0,3,0,0,0,0,0"),
@@ -53,9 +53,9 @@ namespace BackTestUnitTests
             });
 
             // Assert
-            companyData.Dates.First().Price.Should().Be(3);
-            companyData.Dates.Last().Price.Should().Be(2.5);
-            companyData.Dates.ElementAt(1).Price.Should().Be(40);
+            companyData.Data.First().Price.Should().Be(3);
+            companyData.Data.Last().Price.Should().Be(2.5);
+            companyData.Data.ElementAt(1).Price.Should().Be(40);
         }
     }
 }
