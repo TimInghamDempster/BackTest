@@ -103,5 +103,31 @@ namespace BackTestUnitTests
             price3.Price.Should().Be(1.9);
             price4.Price.Should().Be(5.7);
         }
+
+        [Test]
+        public void HandlesMissingPrice()
+        {
+            // Arrange
+            var startDate = new DateTime(1990, 1, 12);
+            var midDate = new DateTime(2000, 2, 3);
+            var endDate = new DateTime(2010, 4, 6);
+
+            var companyA = new CompanyData(new("Company A"),
+                new Dictionary<DateTime, PriceAtTime>()
+                    { { startDate, new(0.5) }, { midDate, new(0.75) } });
+
+            var companies = new Dictionary<CompanyName, CompanyData>()
+                { { companyA.Name, companyA } };
+
+            var dataSource = Substitute.For<IDataSource>();
+            dataSource.GetCompanies().Returns(companies);
+            var marketData = new MarketData(dataSource);
+
+            // Act
+            var price = marketData.GetPriceAtTime(companyA.Name, endDate);
+
+            // Assert
+            price.Price.Should().Be(0.0);
+        }
     }
 }

@@ -35,8 +35,14 @@
 
         public IEnumerable<CompanyName> Companies { get; private init; }
 
+        /// <summary>
+        /// return 0 if no data is found for the company at the given date,
+        /// the assumption is that any shares owned at that time would be
+        /// worthless.
+        /// </summary>
         internal PriceAtTime GetPriceAtTime(CompanyName name, DateTime startDate) =>
-            _data[name].Data[startDate];
+            _data[name].Data.ContainsKey(startDate) ?
+            _data[name].Data[startDate] : new(0.0);
     }
 
     internal record struct CompanyName(string Name);
