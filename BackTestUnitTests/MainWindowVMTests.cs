@@ -23,7 +23,7 @@ namespace BackTestUnitTests
             marketData.LastEntryDate.Returns(endDate);
 
             // Act
-            var vm = new MainWindowVM(marketData);
+            var vm = new MainWindowVM(marketData, Enumerable.Empty<IPriceSeries>());
 
             // Assert
             vm.MainPlot.Axes.Should().Contain(

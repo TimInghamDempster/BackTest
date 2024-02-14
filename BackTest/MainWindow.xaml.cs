@@ -18,7 +18,10 @@ namespace BackTest
             var marketData = new MarketData(dataSource);
 
             WindowState = WindowState.Maximized;
-            DataContext = new MainWindowVM(marketData);
+            DataContext = new MainWindowVM(marketData, new List<IPriceSeries>()
+            {
+                new DummyPriceSeries()
+            });
             InitializeComponent();
         }
     }

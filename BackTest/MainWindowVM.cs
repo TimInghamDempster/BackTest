@@ -8,20 +8,30 @@ namespace BackTest
     {
         public PlotModel MainPlot { get; }
 
-        public MainWindowVM(IMarketData marketData)
+        public MainWindowVM(IMarketData marketData, IEnumerable<IPriceSeries> series)
         {
             MainPlot = new PlotModel() { Title = "Results" };
 
-            MainPlot.Series.Add(new FunctionSeries(Math.Cos, 0, 10, 0.1, "cos(x)"));
-            
-            MainPlot.Axes.Add(new DateTimeAxis() { 
-                Position = AxisPosition.Bottom, 
+            var test = new DummyPriceSeries();
+            var start = DateTimeAxis.ToDouble(marketData.FirstEntryDate);
+            var end = DateTimeAxis.ToDouble(marketData.LastEntryDate);
+            var step = 0.3f;
+
+
+            MainPlot.Axes.Add(new DateTimeAxis()
+            {
+                Position = AxisPosition.Bottom,
                 Title = "Time",
-                Minimum = DateTimeAxis.ToDouble(marketData.FirstEntryDate),
-                Maximum = DateTimeAxis.ToDouble(marketData.LastEntryDate)}
-            );
-            
+                Minimum = start,
+                Maximum = end
+            });
+
             MainPlot.Axes.Add(new LinearAxis() { Position = AxisPosition.Left, Title = "Value ($)" });
+
+            foreach (var s in series)
+            {
+                MainPlot.Series.Add(new FunctionSeries(t => s.Price(DateTimeAxis.ToDateTime(t)).Price, start, end, step, "cos(x)"));
+            }
         }
     }
 }
