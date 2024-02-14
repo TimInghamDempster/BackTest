@@ -2,9 +2,10 @@
 {
     internal interface IMarketData
     {
-        public DateTime FirstEntryDate { get; }
-        public DateTime LastEntryDate { get; }
+        DateTime FirstEntryDate { get; }
+        DateTime LastEntryDate { get; }
         IEnumerable<CompanyName> Companies { get; }
+        PriceAtTime GetPriceAtTime(CompanyName name, DateTime date);
     }
 
     internal class MarketData : IMarketData
@@ -40,9 +41,9 @@
         /// the assumption is that any shares owned at that time would be
         /// worthless.
         /// </summary>
-        internal PriceAtTime GetPriceAtTime(CompanyName name, DateTime startDate) =>
-            _data[name].Data.ContainsKey(startDate) ?
-            _data[name].Data[startDate] : new(0.0);
+        public PriceAtTime GetPriceAtTime(CompanyName name, DateTime date) =>
+            _data[name].Data.ContainsKey(date) ?
+            _data[name].Data[date] : new(0.0);
     }
 
     internal record struct CompanyName(string Name);
