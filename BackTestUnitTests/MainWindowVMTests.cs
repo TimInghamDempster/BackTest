@@ -21,9 +21,11 @@ namespace BackTestUnitTests
             var marketData = Substitute.For<IMarketData>();
             marketData.FirstEntryDate.Returns(startDate);
             marketData.LastEntryDate.Returns(endDate);
+            var marketAtTime = new MarketAtTime(marketData);
+            marketAtTime.SetDate(endDate);
 
             // Act
-            var vm = new MainWindowVM(marketData, Enumerable.Empty<IPriceSeries>());
+            var vm = new MainWindowVM(marketAtTime, marketData, Enumerable.Empty<IPriceSeries>());
 
             // Assert
             vm.MainPlot.Axes.Should().Contain(

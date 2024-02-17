@@ -8,15 +8,12 @@ namespace BackTest
     {
         public PlotModel MainPlot { get; }
 
-        public MainWindowVM(IMarketData marketData, IEnumerable<IPriceSeries> series)
+        public MainWindowVM(MarketAtTime marketAtTime, IMarketData marketData, IEnumerable<IPriceSeries> series)
         {
             MainPlot = new PlotModel() { Title = "Results" };
 
-            var test = new DummyPriceSeries();
             var start = DateTimeAxis.ToDouble(marketData.FirstEntryDate);
             var end = DateTimeAxis.ToDouble(marketData.LastEntryDate);
-            var step = 0.3f;
-
 
             MainPlot.Axes.Add(new DateTimeAxis()
             {
@@ -30,7 +27,27 @@ namespace BackTest
 
             foreach (var s in series)
             {
-                MainPlot.Series.Add(new FunctionSeries(t => s.Price(DateTimeAxis.ToDateTime(t)).Price, start, end, step, "cos(x)"));
+                var dataSeries = new LineSeries
+                {
+                    Title = s.Name,
+                };
+
+                MainPlot.Series.Add(dataSeries);
+
+                var date = marketData.FirstEntryDate;
+
+                while(date < marketData.LastEntryDate)
+                {
+                    if(date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        date = date.AddDays(1);
+                        continue;
+                    }
+                    marketAtTime.SetDate(date);
+                    var value = s.Price(date);
+                    dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
+                    date = date.AddDays(1);
+                }
             }
         }
     }

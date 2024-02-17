@@ -16,12 +16,15 @@ namespace BackTest
             var dataSource = new FileSpecificDataSource(@"C:\Temp\BackTestData");
 
             var marketData = new MarketData(dataSource);
+            var marketAtTime = new MarketAtTime(marketData);
 
             WindowState = WindowState.Maximized;
-            DataContext = new MainWindowVM(marketData, new List<IPriceSeries>()
+            DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeries>()
             {
-                new DummyPriceSeries()
+                Index.WholeMarket(marketAtTime),
+                Index.Take(marketAtTime, 100),
             });
+
             InitializeComponent();
         }
     }
