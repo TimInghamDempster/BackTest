@@ -16,7 +16,14 @@
         {
             var companies = dataSource.GetCompanies();
 
-            Companies = companies.Keys.ToList();
+            // Very crude data sanitization, there is a lot of bad data
+            // in the data set, with impossibly high prices so assume
+            // anything over 5k is bad data.  We will miss some genuine
+            // companies but this is a toy project.
+            Companies = companies.
+                Where(c => c.Value.Data.Max(d => d.Value.Price) < 5000).
+                Select(kvp => kvp.Key).
+                ToList();
 
             _data = dataSource.GetCompanies();
 
@@ -43,7 +50,23 @@
         /// </summary>
         public PriceAtTime GetPriceAtTime(CompanyName name, DateTime date) =>
             _data[name].Data.ContainsKey(date) ?
-            _data[name].Data[date] : new(0.0);
+            _data[name].Data[date] : FillData(date, name);
+
+        private PriceAtTime FillData(DateTime date, CompanyName name)
+        {
+            for(int i = 0; i < 7; i++)
+            {
+                if (_data[name].Data.ContainsKey(date.AddDays(-i)))
+                {
+                    return _data[name].Data[date.AddDays(-i)];
+                }
+                else if (_data[name].Data.ContainsKey(date.AddDays(i)))
+                {
+                    return _data[name].Data[date.AddDays(i)];
+                }
+            }
+            return new (0);
+        }
     }
 
     internal record struct CompanyName(string Name);
