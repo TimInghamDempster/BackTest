@@ -20,8 +20,44 @@
         private static IEnumerable<T> RemoveNulls<T>(this IEnumerable<T?> source) where T : struct =>
             source.Where(r => r.HasValue).Select(r => r!.Value);
 
-        private static IEnumerable<Cells> GetFirstColumns(this IEnumerable<Row> csvData) =>
-            csvData.Select(s => new Cells(s.Data.Split(',').First(), s.Data.Split(',').ElementAt(2)));
+        // Re-writtem from linq based approach as profiling showed the
+        // simple approach was consuming a vast amount of time and allocations
+        private static IEnumerable<Cells> GetFirstColumns(this IEnumerable<Row> csvData)
+        {
+            foreach (var row in csvData)
+            {
+                var commaCount = 0;
+                var firstCommaIndex = int.MaxValue;
+                var secondCommaIndex = int.MaxValue;
+                var thirdCommaIndex = int.MaxValue;
+                for (var i = 0; i < row.Data.Length; i++)
+                {
+                    if (row.Data[i] == ',')
+                    {
+                        commaCount++;
+                        if (commaCount == 1)
+                        {
+                            firstCommaIndex = i;
+                        }
+                        else if (commaCount == 2)
+                        {
+                            secondCommaIndex = i;
+                        }
+                        else if (commaCount == 3)
+                        {
+                            thirdCommaIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                var data = new Cells(
+                    row.Data.Substring(0, firstCommaIndex), 
+                    row.Data.Substring(secondCommaIndex + 1, thirdCommaIndex - (secondCommaIndex + 1)));
+
+                yield return data;
+            }
+        }
 
         private static IEnumerable<(DateTime Date, PriceAtTime Price)?> ParseData(this IEnumerable<Cells> source) =>
             source.Select(c =>
