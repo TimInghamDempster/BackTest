@@ -33,5 +33,14 @@ namespace BackTestUnitTests
                 a.Minimum == DateTimeAxis.ToDouble(startDate) &&
                 a.Maximum == DateTimeAxis.ToDouble(endDate));
         }
+
+        // TODO: It's really hard to convince the VM to
+        // call a mock series, which suggests it needs
+        // refactoring.
+        [Test]
+        public void IgnoresWeekends()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
