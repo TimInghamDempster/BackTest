@@ -1,5 +1,6 @@
 ﻿using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Legends;
 using OxyPlot.Series;
 
 namespace BackTest
@@ -24,6 +25,12 @@ namespace BackTest
             });
 
             MainPlot.Axes.Add(new LinearAxis() { Position = AxisPosition.Left, Title = "Value ($)" });
+
+            MainPlot.Legends.Add(new Legend()
+            { 
+                LegendPlacement = LegendPlacement.Inside,
+                LegendPosition = LegendPosition.TopLeft
+            });
 
             foreach (var s in series)
             {

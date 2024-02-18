@@ -29,7 +29,7 @@
             new("Whole Market", market, (m, d) =>
             new(m.Companies.Select(c => m.GetPriceAtTime(c, d).Price).Sum()));
         public static Index Take(IMarketAtTime market, int count) =>
-           new("Whole Market", market, (m, d) =>
+           new($"Take {count}", market, (m, d) =>
            new(m.Companies.Take(count).Select(c => m.GetPriceAtTime(c, d).Price).Sum()));
     }
 }
