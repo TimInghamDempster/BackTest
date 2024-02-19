@@ -1,0 +1,67 @@
+﻿using BackTest.Data;
+using LanguageExt.Common;
+
+namespace BackTest.Trading
+{
+    internal record struct Cash(double Amount);
+    internal record struct Stock(CompanyName Name, int Amount);
+
+    internal record Portfolio(Cash Cash, IReadOnlyList<Stock> Stocks);
+
+    internal abstract record class Trade
+    {
+        internal record Buy(CompanyName Name, int Amount) : Trade;
+        internal record Sell(CompanyName Name, int Amount) : Trade;
+    }
+
+    internal static class PortflioExtensions
+    {
+        internal static Result<Portfolio> Execute(
+            this Portfolio portfolio, Trade trade, IMarketAtTime market) =>
+            trade switch
+            {
+                Trade.Buy buy => portfolio.Buy(buy, market),
+                Trade.Sell sell => portfolio.Sell(sell, market),
+                _ => throw new ArgumentOutOfRangeException(nameof(trade))
+            };
+
+        private static Result<Portfolio> Sell(this Portfolio portfolio, Trade.Sell sell, IMarketAtTime market)
+        {
+            var price = market.GetPriceAtTime(sell.Name, market.LastEntryDate).Price;
+            if (!portfolio.Stocks.Any(s => s.Name == sell.Name))
+            {
+                return new(new ArgumentOutOfRangeException(nameof(sell), "Stock Not in Portfolio"));
+            }
+            var newStocks = portfolio.Stocks.ToList();
+            var stock = newStocks.FirstOrDefault(s => s.Name == sell.Name);
+            if (stock.Amount < sell.Amount)
+            {
+                return new(new ArgumentOutOfRangeException(nameof(sell), "Not enough stocks"));
+            }
+            newStocks.Remove(stock);
+            newStocks.Add(stock with { Amount = stock.Amount - sell.Amount });
+            return portfolio with { Cash = new(portfolio.Cash.Amount + price * sell.Amount), Stocks = newStocks };
+        }
+
+        private static Result<Portfolio> Buy(this Portfolio portfolio, Trade.Buy buy, IMarketAtTime market)
+        {
+            var price = market.GetPriceAtTime(buy.Name, market.LastEntryDate).Price;
+            var cost = price * buy.Amount;
+            if (cost > portfolio.Cash.Amount)
+            {
+                return new(new ArgumentOutOfRangeException(nameof(buy), "Not enough cash"));
+            }
+            if (!market.Companies.Any(s => s == buy.Name))
+            {
+                return new(new ArgumentOutOfRangeException(nameof(buy), "Stock Not in Portfolio"));
+            }
+            var newStocks = portfolio.Stocks.ToList();
+            var stock = newStocks.FirstOrDefault(s => s.Name == buy.Name);
+           
+            newStocks.Remove(stock);
+            newStocks.Add(stock with { Amount = stock.Amount + buy.Amount });
+            
+            return portfolio with { Cash = new(portfolio.Cash.Amount - cost), Stocks = newStocks };
+        }
+    }
+}
