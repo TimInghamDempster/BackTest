@@ -1,4 +1,4 @@
-﻿namespace BackTest
+﻿namespace BackTest.Data
 {
     internal interface IMarketAtTime : IMarketData;
 

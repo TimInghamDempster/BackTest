@@ -1,4 +1,4 @@
-﻿namespace BackTest
+﻿namespace BackTest.Data
 {
     internal interface IMarketData
     {
@@ -54,7 +54,7 @@
 
         private PriceAtTime FillData(DateTime date, CompanyName name)
         {
-            for(int i = 0; i < 7; i++)
+            for (int i = 0; i < 7; i++)
             {
                 if (_data[name].Data.ContainsKey(date.AddDays(-i)))
                 {
@@ -65,7 +65,7 @@
                     return _data[name].Data[date.AddDays(i)];
                 }
             }
-            return new (0);
+            return new(0);
         }
     }
 

@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using static BackTest.CsvParser;
+using static BackTest.Data.CsvParser;
 
-namespace BackTest
+namespace BackTest.Data
 {
     internal interface IDataSource
     {

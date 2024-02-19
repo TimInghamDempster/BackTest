@@ -1,8 +1,8 @@
-﻿using BackTest;
+﻿using BackTest.Data;
 using FluentAssertions;
 using NSubstitute;
 
-namespace BackTestUnitTests
+namespace BackTestUnitTests.Reference
 {
     public class IndexTests
     {
@@ -19,7 +19,7 @@ namespace BackTestUnitTests
             market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>()).
                 Returns(new PriceAtTime(companyPrice));
 
-            var index = BackTest.Index.WholeMarket(market);
+            var index = BackTest.Reference.Index.WholeMarket(market);
 
             // Act
             var price = index.Price(new DateTime(2021, 1, 1));
@@ -41,7 +41,7 @@ namespace BackTestUnitTests
             market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>()).
                 Returns(new PriceAtTime(companyPrice));
 
-            var index = BackTest.Index.Take(market, companyCount / 2);
+            var index = BackTest.Reference.Index.Take(market, companyCount / 2);
 
             // Act
             var price = index.Price(new DateTime(2021, 1, 1));
@@ -61,13 +61,13 @@ namespace BackTestUnitTests
             var market = Substitute.For<IMarketAtTime>();
             market.Companies.Returns(
                 Enumerable.Range(0, companyCount).Select(i => new CompanyName(i.ToString())));
-            
+
             var price = (string name) => int.Parse(name) % 2 == 0 ? companyPrice : 0;
 
             market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>()).
                 Returns(x => new PriceAtTime(price(((CompanyName)x[0]).Name)));
 
-            var index = BackTest.Index.Top(market, companyCount / 2);
+            var index = BackTest.Reference.Index.Top(market, companyCount / 2);
 
             // Act
             var indexPrice = index.Price(new DateTime(2021, 1, 1));

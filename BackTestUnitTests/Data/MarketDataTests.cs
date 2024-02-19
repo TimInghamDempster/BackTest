@@ -1,8 +1,8 @@
-using BackTest;
+using BackTest.Data;
 using FluentAssertions;
 using NSubstitute;
 
-namespace BackTestUnitTests
+namespace BackTestUnitTests.Data
 {
     public class MarketDataTests
     {
@@ -17,7 +17,7 @@ namespace BackTestUnitTests
             var companyA = new CompanyData(new("Company A"),
                 new Dictionary<DateTime, PriceAtTime>()
                     { { startDate, new(0.5) }, { midDate, new(0.75) } });
-            var companyB = new CompanyData(new("Company B"), 
+            var companyB = new CompanyData(new("Company B"),
                 new Dictionary<DateTime, PriceAtTime>()
                     { { midDate, new(1.9) }, { endDate, new(5.7) } });
 

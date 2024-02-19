@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using BackTest.Data;
+using BackTest.Framework;
+using System.Windows;
+using Index = BackTest.Reference.Index;
 
 namespace BackTest
 {

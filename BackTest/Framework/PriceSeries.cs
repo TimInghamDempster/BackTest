@@ -1,4 +1,6 @@
-﻿namespace BackTest
+﻿using BackTest.Data;
+
+namespace BackTest.Framework
 {
     internal interface IPriceSeries
     {

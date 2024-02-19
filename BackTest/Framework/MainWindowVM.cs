@@ -1,9 +1,10 @@
-﻿using OxyPlot;
+﻿using BackTest.Data;
+using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Legends;
 using OxyPlot.Series;
 
-namespace BackTest
+namespace BackTest.Framework
 {
     internal class MainWindowVM
     {
@@ -27,7 +28,7 @@ namespace BackTest
             MainPlot.Axes.Add(new LinearAxis() { Position = AxisPosition.Left, Title = "Value ($)" });
 
             MainPlot.Legends.Add(new Legend()
-            { 
+            {
                 LegendPlacement = LegendPlacement.Inside,
                 LegendPosition = LegendPosition.TopLeft
             });
@@ -43,9 +44,9 @@ namespace BackTest
 
                 var date = marketData.FirstEntryDate;
 
-                while(date < marketData.LastEntryDate)
+                while (date < marketData.LastEntryDate)
                 {
-                    if(date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                    if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                     {
                         date = date.AddDays(1);
                         continue;

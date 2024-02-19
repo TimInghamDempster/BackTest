@@ -1,4 +1,4 @@
-﻿namespace BackTest
+﻿namespace BackTest.Data
 {
     internal static class CsvParser
     {
@@ -52,7 +52,7 @@
                 }
 
                 var data = new Cells(
-                    row.Data.Substring(0, firstCommaIndex), 
+                    row.Data.Substring(0, firstCommaIndex),
                     row.Data.Substring(secondCommaIndex + 1, thirdCommaIndex - (secondCommaIndex + 1)));
 
                 yield return data;
@@ -64,13 +64,13 @@
             {
                 var dateSuccess = DateTime.TryParse(c.DataCol0, out var res);
                 DateTime? dateTime = dateSuccess ? res : null;
-                
+
                 var priceSuccess = double.TryParse(c.DataCol2, out var price);
                 double? priceDouble = priceSuccess ? price : null;
-                
-                (DateTime, PriceAtTime)? priceAtTime = 
-                priceSuccess && dateSuccess ? 
-                new(dateTime!.Value, new PriceAtTime(price)) : 
+
+                (DateTime, PriceAtTime)? priceAtTime =
+                priceSuccess && dateSuccess ?
+                new(dateTime!.Value, new PriceAtTime(price)) :
                 null;
 
                 return priceAtTime;

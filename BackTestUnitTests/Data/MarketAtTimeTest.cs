@@ -1,8 +1,8 @@
-using BackTest;
+using BackTest.Data;
 using FluentAssertions;
 using NSubstitute;
 
-namespace BackTestUnitTests
+namespace BackTestUnitTests.Data
 {
     public class MarketAtTimeTests
     {
@@ -22,7 +22,7 @@ namespace BackTestUnitTests
             marketAtTime.SetDate(new DateTime(2000, 1, 1));
 
             // Act
-            var price = marketAtTime.GetPriceAtTime(new("Company A"), new DateTime(1990,1,1));
+            var price = marketAtTime.GetPriceAtTime(new("Company A"), new DateTime(1990, 1, 1));
 
             // Assert
             price.Price.Should().Be(0.0);

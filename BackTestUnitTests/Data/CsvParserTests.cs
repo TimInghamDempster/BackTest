@@ -1,8 +1,8 @@
-using BackTest;
+using BackTest.Data;
 using FluentAssertions;
-using static BackTest.CsvParser;
+using static BackTest.Data.CsvParser;
 
-namespace BackTestUnitTests
+namespace BackTestUnitTests.Data
 {
     public class CsvParserTests
     {

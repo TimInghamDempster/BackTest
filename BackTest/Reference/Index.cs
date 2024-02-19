@@ -1,4 +1,7 @@
-﻿namespace BackTest
+﻿using BackTest.Data;
+using BackTest.Framework;
+
+namespace BackTest.Reference
 {
     internal class Index : IPriceSeries
     {

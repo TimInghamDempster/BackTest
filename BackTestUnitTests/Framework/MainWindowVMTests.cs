@@ -1,9 +1,10 @@
-using BackTest;
+using BackTest.Data;
+using BackTest.Framework;
 using FluentAssertions;
 using NSubstitute;
 using OxyPlot.Axes;
 
-namespace BackTestUnitTests
+namespace BackTestUnitTests.Framework
 {
     public class MainWindowVMTests
     {
