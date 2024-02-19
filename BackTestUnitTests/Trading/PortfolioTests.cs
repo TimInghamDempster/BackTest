@@ -88,20 +88,41 @@ namespace BackTestUnitTests.Trading
             result.IsFaulted.Should().BeTrue();
         }
 
-        // TODO: Can't implement this until we have a 
-        // way to price a portfolio
         [Test]
         public void BuyingDoesntAffectBalance()
-        {
-            throw new NotImplementedException();
+        { 
+            // Arrange
+            var portfolio = new Portfolio(new(1), new List<Stock>());
+            var market = Substitute.For<IMarketAtTime>();
+            market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>())
+                .Returns(new PriceAtTime(1.0));
+            market.Companies.Returns(new List<CompanyName> { new("Company A") });
+            var valueBefore = portfolio.Evaluate(market, new DateTime(2020, 1, 1));
+
+            // Act
+            var result = portfolio.Execute(new Trade.Buy(new("Company A"), 1), market);
+
+            // Assert
+            result.IfSucc(p => p.Evaluate(market, new DateTime(2020, 1, 1))
+                .Should().Be(valueBefore));
         }
 
-        // TODO: Can't implement this until we have a 
-        // way to price a portfolio
         [Test]
         public void SellingDoesntAffectBalance()
-        {
-            throw new NotImplementedException();
+        { 
+            // Arrange
+            var portfolio = new Portfolio(new(), new List<Stock> { new(new("Company A"), 1) });
+            var market = Substitute.For<IMarketAtTime>();
+            market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>())
+                .Returns(new PriceAtTime(1.0));
+            var valueBefore = portfolio.Evaluate(market, new DateTime(2020, 1,1));
+
+            // Act
+            var result = portfolio.Execute(new Trade.Sell(new("Company A"), 1), market);
+
+            // Assert
+            result.IfSucc(p => p.Evaluate(market, new DateTime(2020, 1,1))
+                .Should().Be(valueBefore));
         }
     }
 }

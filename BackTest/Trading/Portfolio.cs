@@ -63,5 +63,11 @@ namespace BackTest.Trading
             
             return portfolio with { Cash = new(portfolio.Cash.Amount - cost), Stocks = newStocks };
         }
+
+        internal static PriceAtTime Evaluate(
+            this Portfolio portfolio, IMarketAtTime market, DateTime date) =>
+                new (portfolio.Cash.Amount +
+                portfolio.Stocks.Sum(s => market.GetPriceAtTime(s.Name, date).Price * s.Amount));
+
     }
 }
