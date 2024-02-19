@@ -8,7 +8,7 @@ namespace BackTest.Trading
 
     internal record Portfolio(Cash Cash, IReadOnlyList<Stock> Stocks);
 
-    internal abstract record class Trade
+    internal abstract record Trade
     {
         internal record Buy(CompanyName Name, int Amount) : Trade;
         internal record Sell(CompanyName Name, int Amount) : Trade;
