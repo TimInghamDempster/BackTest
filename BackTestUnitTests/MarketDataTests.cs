@@ -6,11 +6,6 @@ namespace BackTestUnitTests
 {
     public class MarketDataTests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
         public void GetsCorrectPeriod()
         {
