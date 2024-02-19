@@ -49,5 +49,31 @@ namespace BackTestUnitTests
             // Assert
             price.Price.Should().Be(companyCount / 2 * companyPrice);
         }
+
+
+        [Test]
+        public void TopSumsBestPrices()
+        {
+            // Arrange
+            var companyCount = 20;
+            var companyPrice = 2;
+
+            var market = Substitute.For<IMarketAtTime>();
+            market.Companies.Returns(
+                Enumerable.Range(0, companyCount).Select(i => new CompanyName(i.ToString())));
+            
+            var price = (string name) => int.Parse(name) % 2 == 0 ? companyPrice : 0;
+
+            market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>()).
+                Returns(x => new PriceAtTime(price(((CompanyName)x[0]).Name)));
+
+            var index = BackTest.Index.Top(market, companyCount / 2);
+
+            // Act
+            var indexPrice = index.Price(new DateTime(2021, 1, 1));
+
+            // Assert
+            indexPrice.Price.Should().Be(companyCount / 2 * companyPrice);
+        }
     }
 }

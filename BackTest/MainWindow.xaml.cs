@@ -22,7 +22,7 @@ namespace BackTest
             DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeries>()
             {
                 Index.WholeMarket(marketAtTime),
-                Index.Take(marketAtTime, 100),
+                Index.Top(marketAtTime, 100),
             });
 
             InitializeComponent();
