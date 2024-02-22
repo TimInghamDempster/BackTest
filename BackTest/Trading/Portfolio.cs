@@ -39,7 +39,13 @@ namespace BackTest.Trading
                 return new(new ArgumentOutOfRangeException(nameof(sell), "Not enough stocks"));
             }
             newStocks.Remove(stock);
-            newStocks.Add(stock with { Amount = stock.Amount - sell.Amount });
+
+            stock = stock with { Amount = stock.Amount - sell.Amount };
+
+            if (stock.Amount != 0)
+            {
+                newStocks.Add(stock);
+            }
             return portfolio with { Cash = new(portfolio.Cash.Amount + price * sell.Amount), Stocks = newStocks };
         }
 
@@ -57,6 +63,10 @@ namespace BackTest.Trading
             }
             var newStocks = portfolio.Stocks.ToList();
             var stock = newStocks.FirstOrDefault(s => s.Name == buy.Name);
+
+            // If we don't already own any this will be the default
+            // stock and not have a name set
+            stock = stock with { Name = buy.Name };
            
             newStocks.Remove(stock);
             newStocks.Add(stock with { Amount = stock.Amount + buy.Amount });

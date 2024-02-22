@@ -39,6 +39,8 @@ namespace BackTestUnitTests.Trading
 
             // Assert
             result.IsSuccess.Should().BeTrue();
+            result.IfSucc(result => result.Cash.Amount.Should().Be(0.0));
+            result.IfSucc(result => result.Stocks.Should().Contain(new Stock(new("Company A"), 1)));
         }
 
         [Test]
@@ -71,6 +73,26 @@ namespace BackTestUnitTests.Trading
 
             // Assert
             result.IsSuccess.Should().BeTrue();
+            result.IfSucc(result => result.Cash.Amount.Should().Be(1.0));
+            result.IfSucc(result => result.Stocks.Should().BeEmpty());
+        }
+
+        [Test]
+        public void CanPartialSellWithStock()
+        {
+            // Arrange
+            var portfolio = new Portfolio(new(), new List<Stock> { new(new("Company A"), 2) });
+            var market = Substitute.For<IMarketAtTime>();
+            market.GetPriceAtTime(Arg.Any<CompanyName>(), Arg.Any<DateTime>())
+                .Returns(new PriceAtTime(1.0));
+
+            // Act
+            var result = portfolio.Execute(new Trade.Sell(new("Company A"), 1), market);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.IfSucc(result => result.Cash.Amount.Should().Be(1.0));
+            result.IfSucc(result => result.Stocks.Should().Contain(new Stock(new("Company A"), 1)));
         }
 
         [Test]

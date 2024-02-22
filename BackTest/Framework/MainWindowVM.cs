@@ -1,4 +1,5 @@
 ﻿using BackTest.Data;
+using BackTest.Trading;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Legends;
@@ -51,6 +52,12 @@ namespace BackTest.Framework
                         date = date.AddDays(1);
                         continue;
                     }
+
+                    if(s is Trader trader)
+                    {
+                        trader.Update(date);
+                    }
+
                     marketAtTime.SetDate(date);
                     var value = s.Price(date);
                     dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
