@@ -53,12 +53,13 @@ namespace BackTest.Framework
                         continue;
                     }
 
-                    if(s is Trader trader)
+                    marketAtTime.SetDate(date);
+
+                    if (s is Trader trader)
                     {
                         trader.Update(date);
                     }
 
-                    marketAtTime.SetDate(date);
                     var value = s.Price(date);
                     dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
                     date = date.AddDays(1);

@@ -8,5 +8,7 @@ namespace BackTest.Framework
     internal interface IStrategy
     {
         Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio);
+
+        Order GenerateInitialOrder(IMarketAtTime market, Portfolio portfolio);
     }
 }

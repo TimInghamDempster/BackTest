@@ -1,5 +1,6 @@
 ﻿using BackTest.Data;
 using BackTest.Framework;
+using BackTest.Strategies;
 
 namespace BackTest.Trading
 {
@@ -13,7 +14,8 @@ namespace BackTest.Trading
 
         public Trader(Portfolio portfolio, TraderName Name, IMarketAtTime market, IStrategy strategy)
         {
-            _portfolio = portfolio;
+            var initialOrder = strategy.GenerateInitialOrder(market, portfolio);
+            _portfolio = ExecuteOrder(initialOrder, portfolio, market);
             _name = Name;
             _market = market;
             _strategy = strategy;
@@ -27,14 +29,26 @@ namespace BackTest.Trading
         public void Update(DateTime date)
         {
             var order = _strategy.GenerateOrder(_market, date, _portfolio);
+            _portfolio = ExecuteOrder(order, _portfolio, _market);
+        }
 
+        private static Portfolio ExecuteOrder(Order order, Portfolio portfolio, IMarketAtTime market)
+        {
             foreach (var trade in order.Trades)
             {
-                _portfolio =
-                    _portfolio.Execute(trade, _market).Match(
+                portfolio =
+                    portfolio.Execute(trade, market).Match(
                         s => s,
-                        f => _portfolio);
+                        f => portfolio);
             }
+            return portfolio;
+        }
+
+        internal static IPriceSeries IndexTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount)
+        {
+            var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
+
+            return new Trader(portfolio, new("Index"), marketAtTime, new IndexStrategy(companyCount));
         }
     }
 }

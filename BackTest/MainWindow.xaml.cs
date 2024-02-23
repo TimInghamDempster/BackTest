@@ -1,5 +1,6 @@
 ﻿using BackTest.Data;
 using BackTest.Framework;
+using BackTest.Trading;
 using System.Windows;
 using Index = BackTest.Reference.Index;
 
@@ -20,12 +21,14 @@ namespace BackTest
 
             var marketData = new MarketData(dataSource);
             var marketAtTime = new MarketAtTime(marketData);
+            var startingCapital = 1000;
 
             WindowState = WindowState.Maximized;
             DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeries>()
             {
                 Index.WholeMarket(marketAtTime),
                 Index.Top(marketAtTime, 100),
+                Trader.IndexTrader(marketAtTime, startingCapital, 100),
             });
 
             InitializeComponent();
