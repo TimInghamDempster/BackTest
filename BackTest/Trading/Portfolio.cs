@@ -52,6 +52,12 @@ namespace BackTest.Trading
         private static Result<Portfolio> Buy(this Portfolio portfolio, Trade.Buy buy, IMarketAtTime market)
         {
             var price = market.GetPriceAtTime(buy.Name, market.LastEntryDate).Price;
+
+            if (price == 0)
+            {
+                return new(new ArgumentOutOfRangeException(nameof(buy), "Stock Not in Portfolio"));
+            }
+
             var cost = price * buy.Amount;
             if (cost > portfolio.Cash.Amount)
             {
