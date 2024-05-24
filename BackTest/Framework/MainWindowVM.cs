@@ -60,8 +60,11 @@ namespace BackTest.Framework
                         trader.Update(date);
                     }
 
-                    var value = s.Price(date);
-                    dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
+                    if (date.Day == 1)
+                    {
+                        var value = s.Price(date);
+                        dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
+                    }
                     date = date.AddDays(1);
                 }
             }

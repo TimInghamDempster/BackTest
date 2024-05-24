@@ -22,6 +22,10 @@ namespace BackTest.Reference
             return res;
         }
 
+        public static Index Count(IMarketAtTime market) =>
+            new("Count", market, (m, d) =>
+            new(m.Companies.Where(c => market.GetPriceAtTime(c, d).Price > 0).Count()));
+
         public static Index WholeMarket(IMarketAtTime market) =>
             new("Whole Market", market, (m, d) =>
             new(m.Companies.Select(c => m.GetPriceAtTime(c, d).Price).Sum()));

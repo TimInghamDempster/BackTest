@@ -33,6 +33,8 @@ namespace BackTest.Data
         IEnumerable<Company> GetCompanies(string path) =>
             Directory.EnumerateFiles(
                 $"{path}/stock_market_data/nasdaq", "*.csv", SearchOption.AllDirectories).
+            Concat(Directory.EnumerateFiles(
+                $"{path}/stock_market_data/nyse", "*.csv", SearchOption.AllDirectories)).
             Select(f => new Company(f));
 
         IReadOnlyDictionary<CompanyName, CompanyData> IDataSource.GetCompanies() =>

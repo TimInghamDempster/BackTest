@@ -14,6 +14,7 @@
             ParseData().
             RemoveNulls().
             DistinctBy(d => d.Date).
+            Where(d => d.Date.Year > 1980).
             ToDictionary();
 
         // TODO: Move to common library at some point

@@ -4,67 +4,195 @@ using BackTest.Trading;
 
 namespace BackTest.Strategies
 {
-    internal class IndexStrategy : IStrategy
+    internal class IndexStrategyWithBuffer : IStrategy
     {
         private readonly int _companyCount;
+        private readonly int _rebalanceDays;
+        private DateTime _dateOfLastRebalance;
 
-        public IndexStrategy(int companyCount)
+        public IndexStrategyWithBuffer(int companyCount, int rebalanceDays)
         {
             _companyCount = companyCount;
+            _rebalanceDays = rebalanceDays;
         }
-
-        public Order GenerateInitialOrder(IMarketAtTime market, Portfolio portfolio)
-        {
-            var date = market.FirstEntryDate;
-            IEnumerable<CompanyName> companies = GetTopCompanies(market, date);
-
-            var moneyPerCompany = portfolio.Cash.Amount / companies.Count();
-
-            return new(companies.Select(c => new Trade.Buy(
-                    c,
-                    (int)(moneyPerCompany / market.GetPriceAtTime(c, date).Price))));
-        }
-
-        private static IEnumerable<CompanyName> GetTopCompanies(IMarketAtTime market, DateTime date)=>
-            market.Companies
-                .Where(c => market.GetPriceAtTime(c, date).Price > 0)
-                .OrderBy(c => market.GetPriceAtTime(c, date).Price)
-                .Take(100);
 
         public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
         {
-            // Would loose a lot of money to thrashing so debounce
-            var daysBack = 5;
-            if (date - market.FirstEntryDate < TimeSpan.FromDays(daysBack))
+            if ((date - _dateOfLastRebalance).Days > _rebalanceDays)
             {
-                return new Order(new List<Trade>());
+                _dateOfLastRebalance = date;
+                return RebalancePortfolio(market, portfolio, date);
             }
+            return new Order(new List<Trade>());
+        }
 
-            var currentTopCompanies = GetTopCompanies(market, date);
-            for(int i = 0; i < daysBack - 1; i++)
+        private record struct PriceData(CompanyName Name, double Price);
+
+        private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
+        {
+            var topCompanies = market.Companies
+                .Select(c => new PriceData(Name: c, Price: market.GetPriceAtTime(c, date).Price))
+                .OrderByDescending(p =>p.Price)
+                .Where(p => p.Price > 0)
+                .Take((int)(_companyCount * 2.0))
+                .ToDictionary(pd => pd.Name, pd => pd.Price);
+
+            var toBuyFrom = topCompanies.Take(_companyCount).ToDictionary();
+
+            var toSell = portfolio.Stocks
+                .Where(s => !topCompanies.ContainsKey(s.Name));
+
+            var sellOrders = toSell
+                .Select(s => new Trade.Sell(s.Name, portfolio.Stocks.First(ps => ps.Name == s.Name).Amount) as Trade);
+
+            var saleValue = toSell
+                .Select(s => market.GetPriceAtTime(s.Name, date).Price * portfolio.Stocks.First(ps => ps.Name == s.Name).Amount)
+                .Sum();
+
+            var toBuy = toBuyFrom
+                .Where(t => !portfolio.Stocks.Any(s => s.Name == t.Key));
+
+            var costForOneOfEach = toBuy
+                .Select(c => c.Value)
+                .Sum();
+
+            var freeCash = portfolio.Cash.Amount + saleValue;
+            var amount = (int)(freeCash / costForOneOfEach);
+
+            var buyOrders = toBuy
+                .Select(t => new Trade.Buy(t.Key, amount));
+
+            var saleCount = sellOrders.Count();
+
+            return new Order(sellOrders.Concat(buyOrders));
+        }
+    }
+
+    internal class IndexStrategyPartialRebalance : IStrategy
+    {
+        private readonly int _companyCount;
+        private readonly int _rebalanceDays;
+        private DateTime _dateOfLastRebalance;
+
+        public IndexStrategyPartialRebalance(int companyCount, int rebalanceDays)
+        {
+            _companyCount = companyCount;
+            _rebalanceDays = rebalanceDays;
+        }
+
+        public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
+        {
+            if ((date - _dateOfLastRebalance).Days > _rebalanceDays)
             {
-                var previousTopCompanies = GetTopCompanies(market, date - TimeSpan.FromDays(i)).ToList();
-                currentTopCompanies = currentTopCompanies.Concat(previousTopCompanies);
+                _dateOfLastRebalance = date;
+                return RebalancePortfolio(market, portfolio, date);
             }
+            return new Order(new List<Trade>());
+        }
 
-            currentTopCompanies = currentTopCompanies.Distinct();
+        private record struct PriceData(CompanyName Name, double Price);
 
-            var toSell = portfolio.Stocks.Where(s => !currentTopCompanies.Any(c => c == s.Name))
-                .Select(s => new Trade.Sell(s.Name, s.Amount));
+        private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
+        {
+            var topCompanies = market.Companies
+                .Select(c => new PriceData(Name: c, Price: market.GetPriceAtTime(c, date).Price))
+                .OrderByDescending(p => p.Price)
+                .Where(p => p.Price > 0)
+                .Take(_companyCount)
+                .ToDictionary(pd => pd.Name, pd => pd.Price);
 
-            var companiesToBuy = currentTopCompanies.Where(c => !portfolio.Stocks.Any(s => s.Name == c));
+            var toBuyFrom = topCompanies.Take(_companyCount).ToDictionary();
 
-            var proceeds = toSell.Select(s => s.Amount * market.GetPriceAtTime(s.Name, date).Price).Sum();
+            var toSell = portfolio.Stocks
+                .Where(s => !topCompanies.ContainsKey(s.Name));
 
-            var moneyPerCompany = (portfolio.Cash.Amount + proceeds) / _companyCount;
+            var sellOrders = toSell
+                .Select(s => new Trade.Sell(s.Name, portfolio.Stocks.First(ps => ps.Name == s.Name).Amount) as Trade);
 
-            var toBuy = companiesToBuy.Select(c => new Trade.Buy(
-                c,
-                (int)(moneyPerCompany / market.GetPriceAtTime(c, date).Price)))
-                .Where(t => t.Amount > 0)
-                .Select(t => t as Trade);
+            var saleValue = toSell
+                .Select(s => market.GetPriceAtTime(s.Name, date).Price * portfolio.Stocks.First(ps => ps.Name == s.Name).Amount)
+                .Sum();
 
-            return new Order(toBuy.Concat(toSell));
+            var toBuy = toBuyFrom
+                .Where(t => !portfolio.Stocks.Any(s => s.Name == t.Key));
+
+            var costForOneOfEach = toBuy
+                .Select(c => c.Value)
+                .Sum();
+
+            var freeCash = portfolio.Cash.Amount + saleValue;
+            var amount = (int)(freeCash / costForOneOfEach);
+
+            var buyOrders = toBuy
+                .Select(t => new Trade.Buy(t.Key, amount));
+
+            var saleCount = sellOrders.Count();
+
+            return new Order(sellOrders.Concat(buyOrders));
+        }
+    }
+
+    internal class IndexStrategyNaive : IStrategy
+    {
+        private readonly int _companyCount;
+        private readonly int _rebalanceDays;
+        private DateTime _dateOfLastRebalance;
+
+        public IndexStrategyNaive(int companyCount, int rebalanceDays)
+        {
+            _companyCount = companyCount;
+            _rebalanceDays = rebalanceDays;
+        }
+
+        public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
+        {
+            if ((date - _dateOfLastRebalance).Days > _rebalanceDays)
+            {
+                _dateOfLastRebalance = date;
+                return RebalancePortfolio(market, portfolio, date);
+            }
+            return new Order(new List<Trade>());
+        }
+
+        private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
+        {
+            var topCompanies = market.Companies
+                .OrderByDescending(c => market.GetPriceAtTime(c, market.LastEntryDate).Price)
+                .Where(c => market.GetPriceAtTime(c, market.LastEntryDate).Price > 0)
+                .Take(_companyCount);
+
+            var portfolioValue = portfolio.Evaluate(market, date);
+
+            var moneyPerCompany = portfolioValue.Price / topCompanies.Count();
+
+            var targetVolumes = topCompanies.Select(c => new
+            {
+                Company = c,
+                TargetVolume = (int)(moneyPerCompany / market.GetPriceAtTime(c, date).Price)
+            });
+
+            var sellOrders = portfolio.Stocks
+                .Select(s =>
+                {
+                    var amount = Math.Max(s.Amount - (targetVolumes.FirstOrDefault(
+                        t => t.Company == s.Name)?.TargetVolume ?? 0), 0);
+
+                    return new Trade.Sell(s.Name, amount);
+                })
+                .Where(o => o.Amount > 0)
+                .Select(o => o as Trade);
+
+            var buyOrders = targetVolumes
+                .Select(t =>
+                {
+                    var amount = Math.Max(t.TargetVolume - portfolio.Stocks.FirstOrDefault(
+                        s => s.Name == t.Company).Amount, 0);
+
+                    return new Trade.Buy(t.Company, amount);
+                })
+                .Where(o => o.Amount > 0);
+
+            return new Order(sellOrders.Concat(buyOrders));
         }
     }
 }
