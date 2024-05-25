@@ -11,7 +11,7 @@ namespace BackTest.Framework
     {
         public PlotModel MainPlot { get; }
 
-        public MainWindowVM(MarketAtTime marketAtTime, IMarketData marketData, IEnumerable<IPriceSeries> series)
+        public MainWindowVM(MarketAtTime marketAtTime, IMarketData marketData, IEnumerable<IPriceSeriesCollection> seriesCollections)
         {
             MainPlot = new PlotModel() { Title = "Results" };
 
@@ -34,14 +34,20 @@ namespace BackTest.Framework
                 LegendPosition = LegendPosition.TopLeft
             });
 
-            foreach (var s in series)
+            foreach (var c in seriesCollections)
             {
-                var dataSeries = new LineSeries
-                {
-                    Title = s.Name,
-                };
+                var series = new Dictionary<string, LineSeries>();
 
-                MainPlot.Series.Add(dataSeries);
+                foreach (var s in c.Series)
+                {
+                    var dataSeries = new LineSeries
+                    {
+                        Title = s.Name,
+                    };
+
+                    MainPlot.Series.Add(dataSeries);
+                    series.Add(s.Name, dataSeries);
+                }
 
                 var date = marketData.FirstEntryDate;
 
@@ -55,16 +61,18 @@ namespace BackTest.Framework
 
                     marketAtTime.SetDate(date);
 
-                    if (s is Trader trader)
+                    if (c is Trader trader)
                     {
                         trader.Update(date);
                     }
 
-                    if (date.Day == 1)
+                    foreach (var source in c.Series)
                     {
-                        var value = s.Price(date);
+                        var dataSeries = series[source.Name];
+                        var value = source.Price(date);
                         dataSeries.Points.Add(new DataPoint(DateTimeAxis.ToDouble(date), value.Price));
                     }
+                
                     date = date.AddDays(1);
                 }
             }

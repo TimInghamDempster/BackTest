@@ -26,7 +26,7 @@ namespace BackTestUnitTests.Framework
             marketAtTime.SetDate(endDate);
 
             // Act
-            var vm = new MainWindowVM(marketAtTime, marketData, Enumerable.Empty<IPriceSeries>());
+            var vm = new MainWindowVM(marketAtTime, marketData, Enumerable.Empty<IPriceSeriesCollection>());
 
             // Assert
             vm.MainPlot.Axes.Should().Contain(

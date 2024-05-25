@@ -20,7 +20,7 @@ namespace BackTestUnitTests.Trading
             var trader = new Trader(portfolio, new("Test"), market, Substitute.For<IStrategy>());
             
             // Act
-            var result = trader.Price(new DateTime(1,1,1));
+            var result = trader.Series.First().Price(new DateTime(1,1,1));
             
             // Assert
             result.Price.Should().Be(1.0);

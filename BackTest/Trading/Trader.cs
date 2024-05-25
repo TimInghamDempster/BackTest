@@ -4,8 +4,44 @@ using BackTest.Strategies;
 
 namespace BackTest.Trading
 {
+    internal class PortfolioValue : IPriceSeries
+    {
+        private readonly Func<Portfolio> _portfolio;
+        private readonly Func<IMarketAtTime> _market;
+        private readonly TraderName _name;
+
+        public PortfolioValue(Func<Portfolio> portfolio, Func<IMarketAtTime> market, TraderName name)
+        {
+            _portfolio = portfolio;
+            _market = market;
+            _name = name;
+        }
+
+        public string Name => $"{_name.Value} Portfolio value";
+
+        public PriceAtTime Price(DateTime date) =>
+            _portfolio().Evaluate(_market(), date);
+    }
+
+    internal class CashValue : IPriceSeries
+    {
+        private readonly Func<Portfolio> _portfolio;
+        private readonly TraderName _name;
+
+        public CashValue(Func<Portfolio> portfolio, TraderName name)
+        {
+            _portfolio = portfolio;
+            _name = name;
+        }
+
+        public string Name => $"{_name.Value} Cash value";
+
+        public PriceAtTime Price(DateTime date) =>
+            new(_portfolio().Cash.Amount);
+    }
+
     internal record struct TraderName(string Value);
-    internal class Trader : IPriceSeries
+    internal class Trader : IPriceSeriesCollection
     {
         private readonly TraderName _name;
         private Portfolio _portfolio;
@@ -18,12 +54,17 @@ namespace BackTest.Trading
             _name = Name;
             _market = market;
             _strategy = strategy;
+
+            Series =
+            [
+                new PortfolioValue(() => _portfolio, () => _market, Name),
+                new CashValue(() => _portfolio, Name)
+            ];
         }
 
         public string Name => _name.Value;
 
-        public PriceAtTime Price(DateTime date) =>
-            _portfolio.Evaluate(_market, date);
+        public IEnumerable<IPriceSeries> Series { get; }
 
         public void Update(DateTime date)
         {
@@ -79,14 +120,14 @@ namespace BackTest.Trading
             return portfolio;
         }
 
-        internal static IPriceSeries IndexTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
+        internal static IPriceSeriesCollection IndexTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
         {
             var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
 
             return new Trader(portfolio, new($"Index naive {rebalancingPeriod} days"), marketAtTime, new IndexStrategyNaive(companyCount, rebalancingPeriod));
         }
 
-        internal static IPriceSeries IndexTrader2(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
+        internal static IPriceSeriesCollection IndexTrader2(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
         {
             var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
 
@@ -94,7 +135,7 @@ namespace BackTest.Trading
         }
 
 
-        internal static IPriceSeries IndexTrader3(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
+        internal static IPriceSeriesCollection IndexTrader3(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
         {
             var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
 

@@ -21,10 +21,10 @@ namespace BackTest
             var marketData = new MarketData(dataSource);
             var marketAtTime = new MarketAtTime(marketData);
             var startingCapital = 100000000;
-            var companyCount = 500;
+            var companyCount = 100;
 
             WindowState = WindowState.Maximized;
-            DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeries>()
+            DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeriesCollection>()
             {
                 /*Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 30),
                 Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 90),
@@ -32,9 +32,9 @@ namespace BackTest
                 Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 365 * 10),
                 Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 365 * 50),*/
 
-                //Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 90),
-                //Trader.IndexTrader2(marketAtTime, startingCapital, companyCount, 90),
-                //Trader.IndexTrader3(marketAtTime, startingCapital, companyCount, 90),
+                Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 90),
+                Trader.IndexTrader2(marketAtTime, startingCapital, companyCount, 90),
+                Trader.IndexTrader3(marketAtTime, startingCapital, companyCount, 90),
                 Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 365 * 50),
             });
 
