@@ -32,17 +32,20 @@ namespace BackTest
                 //traderBuilder(new IndexStrategyNaive(companyCount, 90)),
                 //traderBuilder(new IndexStrategyNaive(companyCount, 365)),
                 traderBuilder(new IndexStrategyNaive(companyCount, 365 * 10)),
-                traderBuilder(new IndexStrategyNaive(companyCount, 365 * 50)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 365 * 50)),
 
-                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 30)),
-                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 90)),
-                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365)),
-                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 10)),
-                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 50)),
+                //traderBuilder(new IndexStrategyPriceWeighted(companyCount, 30)),
+                //traderBuilder(new IndexStrategyPriceWeighted(companyCount, 90)),
+                //traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365)),
+                //traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 10)),
+               // traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 50)),
+
+                traderBuilder(new IndexStrategyNeutralWeigthRemainder(companyCount, 365)),
+
 
                 //Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 90),
-                //Trader.IndexTrader2(marketAtTime, startingCapital, companyCount, 90),
-                //Trader.IndexTrader3(marketAtTime, startingCapital, companyCount, 90),
+                Trader.IndexTrader2(marketAtTime, startingCapital, companyCount, 90),
+                Trader.IndexTrader3(marketAtTime, startingCapital, companyCount, 90),
                 //Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 365 * 50),
             });
 

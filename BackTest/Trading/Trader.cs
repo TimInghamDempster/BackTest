@@ -74,6 +74,7 @@ namespace BackTest.Trading
                 IndexStrategyPartialRebalance index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyWithBuffer index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyPriceWeighted index => index.GenerateOrder(_market, date, _portfolio),
+                IndexStrategyNeutralWeigthRemainder index => index.GenerateOrder(_market, date, _portfolio),
                 _ => throw new NotImplementedException()
             };
 

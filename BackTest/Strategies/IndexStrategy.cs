@@ -197,6 +197,92 @@ namespace BackTest.Strategies
             return new Order(sellOrders.Concat(buyOrders));
         }
     }
+    internal class IndexStrategyNeutralWeigthRemainder : IStrategy
+    {
+        private readonly int _companyCount;
+        private readonly int _rebalanceDays;
+        private DateTime _dateOfLastRebalance;
+
+        public IndexStrategyNeutralWeigthRemainder(int companyCount, int rebalanceDays)
+        {
+            _companyCount = companyCount;
+            _rebalanceDays = rebalanceDays;
+        }
+
+        public string Name => $"Index Neutral Remainder {_rebalanceDays} days";
+
+        public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
+        {
+            if ((date - _dateOfLastRebalance).Days > _rebalanceDays)
+            {
+                _dateOfLastRebalance = date;
+                return RebalancePortfolio(market, portfolio, date);
+            }
+            return new Order(new List<Trade>());
+        }
+
+        private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
+        {
+            var topCompanies = market.Companies
+                .OrderByDescending(c => market.GetPriceAtTime(c, market.LastEntryDate).Price)
+                .Where(c => market.GetPriceAtTime(c, market.LastEntryDate).Price > 0)
+                .Take(_companyCount);
+
+            var portfolioValue = portfolio.Evaluate(market, date);
+
+            var moneyPerCompany = portfolioValue.Price / topCompanies.Count();
+
+            var targetVolumes = topCompanies.Select(c => new
+            {
+                Company = c,
+                TargetVolume = (int)(moneyPerCompany / market.GetPriceAtTime(c, date).Price)
+            });
+
+            var sellOrders = portfolio.Stocks
+                .Select(s =>
+                {
+                    var amount = Math.Max(s.Amount - (targetVolumes.FirstOrDefault(
+                        t => t.Company == s.Name)?.TargetVolume ?? 0), 0);
+
+                    return new Trade.Sell(s.Name, amount);
+                })
+                .Where(o => o.Amount > 0);
+
+            var buyOrders = targetVolumes
+                .Select(t =>
+                {
+                    var amount = Math.Max(t.TargetVolume - portfolio.Stocks.FirstOrDefault(
+                        s => s.Name == t.Company).Amount, 0);
+
+                    return new Trade.Buy(t.Company, amount);
+                })
+                .Where(o => o.Amount > 0);
+
+            var remainder =
+                portfolioValue.Price -
+                buyOrders.Select(b => market.GetPriceAtTime(b.Name, date).Price * b.Amount).Sum() +
+                sellOrders.Select(s => market.GetPriceAtTime(s.Name, date).Price * s.Amount).Sum();
+
+            while (remainder > 0)
+            {
+                var initialRemainder = remainder;
+                foreach (var company in topCompanies)
+                {
+                    var amount = (int)(remainder / market.GetPriceAtTime(company, date).Price);
+                    remainder -= amount * market.GetPriceAtTime(company, date).Price;
+                    buyOrders = buyOrders.Append(new Trade.Buy(company, amount));
+                }
+
+                if(remainder == initialRemainder)
+                { 
+                    // Can't buy anything with the remainder anymore
+                    break;
+                }
+            }
+
+            return new Order(sellOrders.Select(o => o as Trade).Concat(buyOrders));
+        }
+    }
 
     internal class IndexStrategyNaive : IStrategy
     {
