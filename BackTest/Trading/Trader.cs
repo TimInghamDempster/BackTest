@@ -120,6 +120,16 @@ namespace BackTest.Trading
             return portfolio;
         }
 
+        internal static Func<int, IStrategy, IPriceSeriesCollection> CreateTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount)
+        {
+            return (int rebalancePeriod, IStrategy strategy) =>
+            {
+                var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
+
+                return new Trader(portfolio, new(strategy.Name), marketAtTime, strategy);
+            };
+        }
+ 
         internal static IPriceSeriesCollection IndexTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount, int rebalancingPeriod)
         {
             var portfolio = new Portfolio(new(startingCapital), new List<Stock>());

@@ -10,6 +10,8 @@ namespace BackTest.Strategies
         private readonly int _rebalanceDays;
         private DateTime _dateOfLastRebalance;
 
+        public string Name => $"Index buffer {_rebalanceDays} days";
+
         public IndexStrategyWithBuffer(int companyCount, int rebalanceDays)
         {
             _companyCount = companyCount;
@@ -73,6 +75,8 @@ namespace BackTest.Strategies
         private readonly int _companyCount;
         private readonly int _rebalanceDays;
         private DateTime _dateOfLastRebalance;
+
+        public string Name => $"Index partial rebalance {_rebalanceDays} days";
 
         public IndexStrategyPartialRebalance(int companyCount, int rebalanceDays)
         {
@@ -143,6 +147,8 @@ namespace BackTest.Strategies
             _companyCount = companyCount;
             _rebalanceDays = rebalanceDays;
         }
+
+        public string Name => $"Index Naive {_rebalanceDays} days";
 
         public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
         {
