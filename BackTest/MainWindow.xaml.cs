@@ -28,11 +28,17 @@ namespace BackTest
             WindowState = WindowState.Maximized;
             DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeriesCollection>()
             {
-                traderBuilder(30, new IndexStrategyNaive(companyCount, 30)),
-                traderBuilder(90, new IndexStrategyNaive(companyCount, 90)),
-                traderBuilder(365, new IndexStrategyNaive(companyCount, 365)),
-                traderBuilder(365 * 10, new IndexStrategyNaive(companyCount, 365 * 10)),
-                traderBuilder(365 * 50, new IndexStrategyNaive(companyCount, 365 * 50)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 30)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 90)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 365)),
+                traderBuilder(new IndexStrategyNaive(companyCount, 365 * 10)),
+                traderBuilder(new IndexStrategyNaive(companyCount, 365 * 50)),
+
+                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 30)),
+                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 90)),
+                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365)),
+                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 10)),
+                traderBuilder(new IndexStrategyPriceWeighted(companyCount, 365 * 50)),
 
                 //Trader.IndexTrader(marketAtTime, startingCapital, companyCount, 90),
                 //Trader.IndexTrader2(marketAtTime, startingCapital, companyCount, 90),

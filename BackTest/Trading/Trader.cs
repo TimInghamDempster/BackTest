@@ -73,6 +73,7 @@ namespace BackTest.Trading
                 IndexStrategyNaive index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyPartialRebalance index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyWithBuffer index => index.GenerateOrder(_market, date, _portfolio),
+                IndexStrategyPriceWeighted index => index.GenerateOrder(_market, date, _portfolio),
                 _ => throw new NotImplementedException()
             };
 
@@ -120,9 +121,9 @@ namespace BackTest.Trading
             return portfolio;
         }
 
-        internal static Func<int, IStrategy, IPriceSeriesCollection> CreateTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount)
+        internal static Func<IStrategy, IPriceSeriesCollection> CreateTrader(IMarketAtTime marketAtTime, int startingCapital, int companyCount)
         {
-            return (int rebalancePeriod, IStrategy strategy) =>
+            return (IStrategy strategy) =>
             {
                 var portfolio = new Portfolio(new(startingCapital), new List<Stock>());
 
