@@ -4,6 +4,91 @@ using BackTest.Trading;
 
 namespace BackTest.Strategies
 {
+    internal class IndexStrategyWithBufferNeutral : IStrategy
+    {
+        private readonly int _companyCount;
+        private readonly int _rebalanceDays;
+        private DateTime _dateOfLastRebalance;
+
+        public string Name => $"Index neutral buffer {_rebalanceDays} days";
+
+        public IndexStrategyWithBufferNeutral(int companyCount, int rebalanceDays)
+        {
+            _companyCount = companyCount;
+            _rebalanceDays = rebalanceDays;
+        }
+
+        public Order GenerateOrder(IMarketAtTime market, DateTime date, Portfolio portfolio)
+        {
+            if ((date - _dateOfLastRebalance).Days > _rebalanceDays)
+            {
+                _dateOfLastRebalance = date;
+                return RebalancePortfolio(market, portfolio, date);
+            }
+            return new Order(new List<Trade>());
+        }
+
+        private record struct PriceData(CompanyName Name, double Price);
+
+        private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
+        {
+            var topCompanies = market.Companies
+                .Select(c => new PriceData(Name: c, Price: market.GetPriceAtTime(c, date).Price))
+                .OrderByDescending(p => p.Price)
+                .Where(p => p.Price > 0)
+                .Take((int)(_companyCount * 2.0))
+                .ToDictionary(pd => pd.Name, pd => pd.Price);
+
+            var topWithoutBuffer = topCompanies.Take(_companyCount);
+
+            var portfolioTopCompanies = portfolio.Stocks
+                .Where(s => topCompanies.ContainsKey(s.Name));
+
+            var availableCompanies = topWithoutBuffer
+                .Where(c => !portfolioTopCompanies.Any(p => c.Key == p.Name));
+
+            var missingCompanyCount = _companyCount - portfolioTopCompanies.Count();
+
+            var targetPortfolio = 
+                portfolioTopCompanies
+                .Select(c =>c.Name)
+                .Concat(availableCompanies.Take(missingCompanyCount).Select(kvp => kvp.Key));
+
+            var portfolioValue = portfolio.Evaluate(market, date);
+
+            var moneyPerCompany = portfolioValue.Price / targetPortfolio.Count();
+
+            var targetVolumes = targetPortfolio.Select(c => new
+            {
+                Company = c,
+                TargetVolume = (int)(moneyPerCompany / market.GetPriceAtTime(c, date).Price)
+            });
+
+            var sellOrders = portfolio.Stocks
+                .Select(s =>
+                {
+                    var amount = Math.Max(s.Amount - (targetVolumes.FirstOrDefault(
+                        t => t.Company == s.Name)?.TargetVolume ?? 0), 0);
+
+                    return new Trade.Sell(s.Name, amount);
+                })
+                .Where(o => o.Amount > 0)
+                .Select(o => o as Trade);
+
+            var buyOrders = targetVolumes
+                .Select(t =>
+                {
+                    var amount = Math.Max(t.TargetVolume - portfolio.Stocks.FirstOrDefault(
+                        s => s.Name == t.Company).Amount, 0);
+
+                    return new Trade.Buy(t.Company, amount);
+                })
+                .Where(o => o.Amount > 0);
+
+            return new Order(sellOrders.Concat(buyOrders));
+        }
+    }
+
     internal class IndexStrategyWithBuffer : IStrategy
     {
         private readonly int _companyCount;
@@ -311,8 +396,8 @@ namespace BackTest.Strategies
         private Order RebalancePortfolio(IMarketAtTime market, Portfolio portfolio, DateTime date)
         {
             var topCompanies = market.Companies
-                .OrderByDescending(c => market.GetPriceAtTime(c, market.LastEntryDate).Price)
-                .Where(c => market.GetPriceAtTime(c, market.LastEntryDate).Price > 0)
+                .OrderByDescending(c => market.GetPriceAtTime(c, date).Price)
+                .Where(c => market.GetPriceAtTime(c, date).Price > 0)
                 .Take(_companyCount);
 
             var portfolioValue = portfolio.Evaluate(market, date);
