@@ -58,7 +58,7 @@ namespace BackTest.Trading
             Series =
             [
                 new PortfolioValue(() => _portfolio, () => _market, Name),
-                new CashValue(() => _portfolio, Name)
+                //new CashValue(() => _portfolio, Name)
             ];
         }
 
@@ -75,6 +75,9 @@ namespace BackTest.Trading
                 IndexStrategyWithBuffer index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyPriceWeighted index => index.GenerateOrder(_market, date, _portfolio),
                 IndexStrategyNeutralWeigthRemainder index => index.GenerateOrder(_market, date, _portfolio),
+                IndexStrategyWithBufferNeutral index => index.GenerateOrder(_market, date, _portfolio),
+                IndexStrategyWithPrediction index => index.GenerateOrder(_market, date, _portfolio),
+                IndexStrategyWithPredictionAndBuffer index => index.GenerateOrder(_market, date, _portfolio),
                 _ => throw new NotImplementedException()
             };
 

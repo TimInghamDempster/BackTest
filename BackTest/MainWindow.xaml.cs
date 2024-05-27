@@ -29,17 +29,24 @@ namespace BackTest
             DataContext = new MainWindowVM(marketAtTime, marketData, new List<IPriceSeriesCollection>()
             {
                 //traderBuilder(new IndexStrategyNaive(companyCount, 30)),
-                traderBuilder(new IndexStrategyNaive(companyCount, 90)),
-                traderBuilder(new IndexStrategyNaive(companyCount, 365)),
-                traderBuilder(new IndexStrategyNaive(companyCount, 365 * 10)),
-                traderBuilder(new IndexStrategyNaive(companyCount, 365 * 50)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 90)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 365)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 365 * 10)),
+                //traderBuilder(new IndexStrategyNaive(companyCount, 365 * 50)),
 
-                //traderBuilder(new IndexStrategyWithBufferNeutral(companyCount, 30)),
-                traderBuilder(new IndexStrategyWithBufferNeutral(companyCount, 90)),
-                traderBuilder(new IndexStrategyWithBufferNeutral(companyCount, 365)),
+                //traderBuilder(new IndexStrategyWithPredictionAndBuffer(companyCount, 30)),
+                traderBuilder(new IndexStrategyWithPredictionAndBuffer(companyCount, 90)),
+                traderBuilder(new IndexStrategyWithPredictionAndBuffer(companyCount, 365)),
+                traderBuilder(new IndexStrategyWithPredictionAndBuffer(companyCount, 365 * 10)),
+                //traderBuilder(new IndexStrategyWithPredictionAndBuffer(companyCount, 365 * 50)),
+
+               // traderBuilder(new IndexStrategyWithPrediction(companyCount, 30)),
+                //traderBuilder(new IndexStrategyWithPrediction(companyCount, 90)),
+                //traderBuilder(new IndexStrategyWithPrediction(companyCount, 365)),
+                //traderBuilder(new IndexStrategyWithPrediction(companyCount, 365 * 10)),
+                //traderBuilder(new IndexStrategyWithPrediction(companyCount, 365 * 50)),
+
                 traderBuilder(new IndexStrategyWithBufferNeutral(companyCount, 365 * 10)),
-                traderBuilder(new IndexStrategyWithBufferNeutral(companyCount, 365 * 50)),
-
                 //traderBuilder(new IndexStrategyNeutralWeigthRemainder(companyCount, 365)),
 
 
