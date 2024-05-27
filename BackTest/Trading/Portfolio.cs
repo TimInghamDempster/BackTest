@@ -38,6 +38,10 @@ namespace BackTest.Trading
             {
                 return new(new ArgumentOutOfRangeException(nameof(sell), "Not enough stocks"));
             }
+            if(sell.Amount < 0)
+            {
+                return new(new ArgumentOutOfRangeException(nameof(sell), "Amount must be positive"));
+            }
             newStocks.Remove(stock);
 
             stock = stock with { Amount = stock.Amount - sell.Amount };
@@ -66,6 +70,10 @@ namespace BackTest.Trading
             if (!market.Companies.Any(s => s == buy.Name))
             {
                 return new(new ArgumentOutOfRangeException(nameof(buy), "Stock Not in Portfolio"));
+            }
+            if(buy.Amount < 0)
+            {
+                return new(new ArgumentOutOfRangeException(nameof(buy), "Amount must be positive"));
             }
             var newStocks = portfolio.Stocks.ToList();
             var stock = newStocks.FirstOrDefault(s => s.Name == buy.Name);
